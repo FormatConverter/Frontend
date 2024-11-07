@@ -16,18 +16,18 @@ if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir);
 }
 
-// Serve a simple HTML form for testing (upload HTML)
+// serve a simple HTML form for testing (upload HTML)
 app.get('/', (req, res) => {
   res.send(`
-    <form action="/upload" method="post" enctype="multipart/form-data">
+    <form action="/upload-and-convert" method="post" enctype="multipart/form-data">
       <input type="file" name="htmlFile" accept=".html" />
-      <button type="submit">Upload HTML</button>
+      <button type="submit">Upload and Convert to PDF</button>
     </form>
   `);
 });
 
-// POST endpoint to handle file upload
-app.post('/upload', upload.single('htmlFile'), async (req, res) => {
+// POST endpoint to handle file upload and conversion
+app.post('/upload-and-convert', upload.single('htmlFile'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
@@ -37,27 +37,12 @@ app.post('/upload', upload.single('htmlFile'), async (req, res) => {
     const filePath = path.join(tempDir, `uploaded-${Date.now()}.html`);
     fs.writeFileSync(filePath, req.file.buffer);
     console.log('File uploaded successfully:', filePath);
-    res.status(200).send(`File uploaded successfully. You can now convert it to PDF by visiting /convert.`);
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(500).send('Error uploading file.');
-  }
-});
 
-// POST endpoint to convert the uploaded HTML to PDF
-app.post('/convert', async (req, res) => {
-  try {
-    // Find the most recent uploaded HTML file (for simplicity)
-    const uploadedFiles = fs.readdirSync(tempDir).filter(file => file.endsWith('.html'));
-    if (uploadedFiles.length === 0) {
-      return res.status(400).send('No uploaded HTML file found to convert.');
-    }
-
-    const htmlFilePath = path.join(tempDir, uploadedFiles[uploadedFiles.length - 1]);
+    // Convert the uploaded HTML file to PDF
     const pdfFilePath = path.join(tempDir, `converted-${Date.now()}.pdf`);
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    const htmlContent = fs.readFileSync(htmlFilePath, 'utf-8');
+    const htmlContent = fs.readFileSync(filePath, 'utf-8');
 
     // set the content of the page to the uploaded HTML
     await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
@@ -67,54 +52,54 @@ app.post('/convert', async (req, res) => {
     await browser.close();
 
     console.log('PDF generated successfully:', pdfFilePath);
-    res.status(200).send(`File converted successfully. You can now download the PDF by visiting /download.`);
+
+    // send the converted PDF file for download
+    res.status(200).send(`
+      File uploaded and converted to PDF successfully. 
+      You can download the PDF by visiting <a href="/download?file=${path.basename(pdfFilePath)}">here</a>.
+    `);
   } catch (error) {
-    console.error('Error converting file:', error);
-    res.status(500).send('Error converting HTML to PDF.');
+    console.error('Error uploading and converting file:', error);
+    res.status(500).send('Error uploading or converting file.');
   }
 });
 
 // Serve the converted PDF for download
-app.get('/download', async (req, res) => {
-    try {
-      // Find the most recent converted PDF file
-      const pdfFiles = fs.readdirSync(tempDir).filter(file => file.endsWith('.pdf'));
-      if (pdfFiles.length === 0) {
-        return res.status(400).send('No converted PDF file found to download.');
-      }
-  
-      const pdfFilePath = path.join(tempDir, pdfFiles[pdfFiles.length - 1]);
-  
-      // Send the PDF file for download
-      res.download(pdfFilePath, (err) => {
-        if (err) {
-          console.error('Error downloading file:', err);
-          res.status(500).send('Error downloading the PDF file.');
-        } else {
-          console.log('PDF downloaded successfully:', pdfFilePath);
-        }
-      });
-    } catch (error) {
-      console.error('Error during download:', error);
-      res.status(500).send('Error during download.');
+app.get('/download', (req, res) => {
+  const pdfFileName = req.query.file;
+  if (!pdfFileName) {
+    return res.status(400).send('No PDF file specified.');
+  }
+
+  const pdfFilePath = path.join(tempDir, pdfFileName);
+  if (!fs.existsSync(pdfFilePath)) {
+    return res.status(404).send('PDF file not found.');
+  }
+
+  // send the PDF file for download
+  res.download(pdfFilePath, (err) => {
+    if (err) {
+      console.error('Error downloading file:', err);
+      res.status(500).send('Error downloading the PDF file.');
+    } else {
+      console.log('PDF downloaded successfully:', pdfFilePath);
     }
   });
-  
+});
 
 process.on('SIGINT', () => {
-    console.log('Server shutting down...');
-    const files = fs.readdirSync(tempDir);
-    files.forEach(file => {
-      const filePath = path.join(tempDir, file);
-      fs.unlinkSync(filePath);
-    });
-  
-    fs.rmdirSync(tempDir);
-    console.log('Temp directory deleted.');
+  console.log('Server shutting down...');
+  const files = fs.readdirSync(tempDir);
+  files.forEach(file => {
+    const filePath = path.join(tempDir, file);
+    fs.unlinkSync(filePath);
+  });
 
-    process.exit(0);
+  fs.rmdirSync(tempDir);
+  console.log('Temp directory deleted.');
+
+  process.exit(0);
 });
-  
 
 // Start the server
 app.listen(port, () => {
