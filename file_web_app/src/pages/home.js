@@ -5,11 +5,11 @@ import { Heading, Text, Box, Button, Select, Input, Spinner } from "@chakra-ui/r
 const Home = () => {
     const [file, setFile] = useState(null);
     const [format, setFormat] = useState("mp3");
-    const [codec, setCodec] = useState("pcm_s16le");
-    const [bitrate, setBitrate] = useState("192k");
-    const [sampleRate, setSampleRate] = useState("44100");
-    const [channels, setChannels] = useState("2");
-    const [volume, setVolume] = useState("1.0");
+    // const [codec, setCodec] = useState("pcm_s16le");
+    // const [bitrate, setBitrate] = useState("192k");
+    // const [sampleRate, setSampleRate] = useState("44100");
+    // const [channels, setChannels] = useState("2");
+    // const [volume, setVolume] = useState("1.0");
     const [isLoading, setIsLoading] = useState(false);
     const [convertedFile, setConvertedFile] = useState(null);
     const [error, setError] = useState(null);
@@ -47,14 +47,14 @@ const Home = () => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("output_format", format);
-        formData.append("codec", codec);
-        formData.append("bitrate", bitrate);
-        formData.append("sample_rate", sampleRate);
-        formData.append("channels", channels);
-        formData.append("volume", volume);
+        // formData.append("codec", codec);
+        // formData.append("bitrate", bitrate);
+        // formData.append("sample_rate", sampleRate);
+        // formData.append("channels", channels);
+        // formData.append("volume", volume);
 
         try {
-            const response = await axios.post("http://localhost:5000/convert_audio", formData, {
+            const response = await axios.post("http://127.0.0.1:5000/convert_audio", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -75,7 +75,7 @@ const Home = () => {
             return;
         }
 
-        window.location.href = `http://localhost:5000/download/${convertedFile}`;
+        window.location.href = `http://127.0.0.1/download/${convertedFile}`;
     };
 
     return (
@@ -100,7 +100,7 @@ const Home = () => {
                 <option value="opus">OPUS</option>
             </Select>
 
-            <Box mb="4">
+            {/* <Box mb="4">
                 <Text>Codec:</Text>
                 <Input value={codec} onChange={(e) => setCodec(e.target.value)} placeholder="Enter codec (e.g., pcm_s16le)" />
             </Box>
@@ -119,7 +119,7 @@ const Home = () => {
             <Box mb="4">
                 <Text>Volume Multiplier:</Text>
                 <Input value={volume} onChange={(e) => setVolume(e.target.value)} placeholder="Enter volume (e.g., 1.5)" />
-            </Box>
+            </Box> */}
 
             <Button onClick={handleConvert} {...buttonStyles} disabled={isLoading}>
                 {isLoading ? <Spinner size="sm" /> : `Convert to ${format}`}
@@ -144,3 +144,4 @@ const Home = () => {
 };
 
 export default Home;
+
