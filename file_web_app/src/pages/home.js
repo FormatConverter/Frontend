@@ -5,11 +5,11 @@ import { Heading, Text, Box, Button, Select, Input, Spinner } from "@chakra-ui/r
 const Home = () => {
     const [file, setFile] = useState(null);
     const [format, setFormat] = useState("mp3");
-    const [codec, setCodec] = useState("pcm_s16le");
-    const [bitrate, setBitrate] = useState("192k");
-    const [sampleRate, setSampleRate] = useState("44100");
-    const [channels, setChannels] = useState("2");
-    const [volume, setVolume] = useState("1.0");
+    const [codec, setCodec] = useState("");
+    const [bitrate, setBitrate] = useState("");
+    const [sampleRate, setSampleRate] = useState("");
+    const [channels, setChannels] = useState("");
+    const [volume, setVolume] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [convertedFile, setConvertedFile] = useState(null);
     const [error, setError] = useState(null);
@@ -33,6 +33,7 @@ const Home = () => {
             }
             setFile(selectedFile);
             setError(null); // Reset any previous errors
+            console.log(`Selected file: ${selectedFile.name}`);
         }
     };
 
@@ -47,35 +48,58 @@ const Home = () => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("output_format", format);
-        formData.append("codec", codec);
-        formData.append("bitrate", bitrate);
-        formData.append("sample_rate", sampleRate);
-        formData.append("channels", channels);
-        formData.append("volume", volume);
+        if (codec) formData.append("codec", codec);
+        if (bitrate) formData.append("bitrate", bitrate);
+        if (sampleRate) formData.append("sample_rate", sampleRate);
+        if (channels) formData.append("channels", channels);
+        if (volume) formData.append("volume", volume);
 
         try {
-            const response = await axios.post("http://localhost:5000/convert_audio", formData, {
+            const response = await axios.post("http://127.0.0.1:5000/convert", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
 
             setConvertedFile(response.data.output_file);
+            alert("File converted successfully!");
         } catch (error) {
-            console.error("Error during file conversion:", error.response?.data || error.message);
-            setError("File conversion failed. Please check the server or file compatibility.");
+            console.error("Error during file conversion:", error.response || error.message);
+            const errorMessage =
+                error.response?.data?.error ||
+                "File conversion failed. Please check the server or file compatibility.";
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         if (!convertedFile) {
             alert("No file available for download.");
             return;
         }
+        setIsLoading(true);
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/download/${convertedFile}`, {
+                responseType: 'blob',
+            });
 
-        window.location.href = `http://localhost:5000/download/${convertedFile}`;
+            const blob = new Blob([response.data]);
+
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = convertedFile;
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+
+        } catch (error) {
+            console.error("Error during file download:", error);
+            alert("Download failed.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -90,7 +114,7 @@ const Home = () => {
                 <Input type="file" onChange={handleFileChange} mt="2" />
             </Box>
 
-            <Select placeholder="Select format" value={format} onChange={(e) => setFormat(e.target.value)} mb="4" width="full">
+            <Select value={format} onChange={(e) => setFormat(e.target.value)} mb="4" width="full">
                 <option value="mp3">MP3</option>
                 <option value="wav">WAV</option>
                 <option value="flac">FLAC</option>
@@ -134,8 +158,8 @@ const Home = () => {
             {convertedFile && (
                 <Box mt="4">
                     <Text fontSize="sm">Download your converted file below:</Text>
-                    <Button colorScheme="green" onClick={handleDownload} mt="2">
-                        Download {convertedFile}
+                    <Button colorScheme="green" onClick={handleDownload} mt="2" disabled={isLoading}>
+                        {isLoading ? <Spinner size="sm" /> : `Download ${convertedFile}`}
                     </Button>
                 </Box>
             )}
