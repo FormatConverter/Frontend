@@ -56,10 +56,11 @@ const Home = () => {
         // formData.append("volume", volume);
 
         try {
-            const response = await axios.post("http://127.0.0.1:5000/convert_audio", formData, {
+            const response = await axios.post("http://127.0.0.1:5050/convert_audio", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
+				withCredentials: true,
             });
 
             setConvertedFile(response.data.output_file);
@@ -81,9 +82,10 @@ const Home = () => {
     
         try {
             // Send a GET request to fetch the file from the server
-            const response = await axios.get(`http://127.0.0.1:5000/download/${convertedFile}`, {
+            const response = await axios.get(`http://127.0.0.1:5050/download/${convertedFile}`, {
                 responseType: 'blob', // Ensure that the response is treated as a file
-            });
+				withCredentials: true,
+			});
     
             // Create a download link for the Blob object
             const url = window.URL.createObjectURL(new Blob([response.data]));
