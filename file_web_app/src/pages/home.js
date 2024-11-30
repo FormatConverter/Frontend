@@ -69,14 +69,50 @@ const Home = () => {
         }
     };
 
-    const handleDownload = () => {
+    // const handleDownload = () => {
+    //     if (!convertedFile) {
+    //         alert("No file available for download.");
+    //         return;
+    //     }
+
+    //     window.location.href = `http://127.0.0.1/download/${convertedFile}`;
+    // };
+    const handleDownload = async () => {
         if (!convertedFile) {
             alert("No file available for download.");
             return;
         }
-
-        window.location.href = `http://127.0.0.1/download/${convertedFile}`;
+    
+        setIsLoading(true);
+    
+        try {
+            // Send a GET request to fetch the file from the server
+            const response = await axios.get(`http://127.0.0.1:5000/download/${convertedFile}`, {
+                responseType: 'blob', // Ensure that the response is treated as a file
+            });
+    
+            // Create a download link for the Blob object
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', convertedFile); // Filename for download
+            document.body.appendChild(link);
+            link.click();
+    
+            // Clean up the URL object after download
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+    
+        } catch (error) {
+            console.error("Error during file download:", error.message);
+            setError("Failed to download the file.");
+        } finally {
+            setIsLoading(false);
+        }
     };
+    
 
     return (
         <Box textAlign="center" p="6">
@@ -131,14 +167,19 @@ const Home = () => {
                 </Text>
             )}
 
-            {convertedFile && (
+            <Button onClick={handleDownload} {...buttonStyles} >
+                Download File
+            </Button>
+
+            {/* {convertedFile && (
                 <Box mt="4">
                     <Text fontSize="sm">Download your converted file below:</Text>
                     <Button colorScheme="green" onClick={handleDownload} mt="2">
                         Download {convertedFile}
                     </Button>
                 </Box>
-            )}
+            )} */}
+            
         </Box>
     );
 };
