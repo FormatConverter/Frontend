@@ -5,6 +5,7 @@ import { Heading, Text, Box, Button, Select, Input, Spinner } from "@chakra-ui/r
 const Home = () => {
     const [file, setFile] = useState(null);
     const [format, setFormat] = useState("mp3");
+    // Todo
     // const [codec, setCodec] = useState("pcm_s16le");
     // const [bitrate, setBitrate] = useState("192k");
     // const [sampleRate, setSampleRate] = useState("44100");
@@ -47,6 +48,7 @@ const Home = () => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("output_format", format);
+        // TODOs:
         // formData.append("codec", codec);
         // formData.append("bitrate", bitrate);
         // formData.append("sample_rate", sampleRate);
@@ -69,14 +71,6 @@ const Home = () => {
         }
     };
 
-    // const handleDownload = () => {
-    //     if (!convertedFile) {
-    //         alert("No file available for download.");
-    //         return;
-    //     }
-
-    //     window.location.href = `http://127.0.0.1/download/${convertedFile}`;
-    // };
     const handleDownload = async () => {
         if (!convertedFile) {
             alert("No file available for download.");
@@ -136,6 +130,10 @@ const Home = () => {
                 <option value="opus">OPUS</option>
             </Select>
 
+            {/* TODO:
+            * DO not do anything if user did not enter anything for optional parameter
+            * Make a Advanced dropdown to hide optional parameter for default
+            */}
             {/* <Box mb="4">
                 <Text>Codec:</Text>
                 <Input value={codec} onChange={(e) => setCodec(e.target.value)} placeholder="Enter codec (e.g., pcm_s16le)" />
@@ -167,18 +165,10 @@ const Home = () => {
                 </Text>
             )}
 
+            {/* TODO: Make this appear only when conversion is done */}
             <Button onClick={handleDownload} {...buttonStyles} >
                 Download File
             </Button>
-
-            {/* {convertedFile && (
-                <Box mt="4">
-                    <Text fontSize="sm">Download your converted file below:</Text>
-                    <Button colorScheme="green" onClick={handleDownload} mt="2">
-                        Download {convertedFile}
-                    </Button>
-                </Box>
-            )} */}
             
         </Box>
     );
