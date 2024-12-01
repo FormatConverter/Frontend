@@ -1,3 +1,10 @@
+
+```bash
+npm install
+npm start
+```
+
+--------------------Out Dated--------------------
 # Format_Converter
 
 
