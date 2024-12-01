@@ -1,20 +1,33 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Heading, Text, Box, Button, Select, Input, Spinner } from "@chakra-ui/react";
+import {
+    Heading,
+    Text,
+    Box,
+    Button,
+    Select,
+    Input,
+    Spinner,
+    Checkbox,
+    VStack,
+    Flex,
+} from "@chakra-ui/react";
 
 const Home = () => {
     const [file, setFile] = useState(null);
     const [format, setFormat] = useState("mp3");
-    const [codec, setCodec] = useState("");
     const [bitrate, setBitrate] = useState("");
     const [sampleRate, setSampleRate] = useState("");
-    const [channels, setChannels] = useState("");
     const [volume, setVolume] = useState("");
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [convertedFile, setConvertedFile] = useState(null);
     const [error, setError] = useState(null);
 
-    const buttonStyles = { px: 10, flex: 1, mt: 10, colorScheme: "yellow" };
+    const allowedFormats = ["wav", "mp3", "flac", "aac", "ogg", "m4a", "wma", "webm", "opus", "aiff"];
+    const allowedBitrates = ["64k", "128k", "192k", "256k", "320k"];
+    const allowedSampleRates = ["22050", "44100", "48000", "96000", "192000"];
+    const allowedVolumes = ["0.5", "1.0", "1.5", "2.0"];
 
     useEffect(() => {
         document.title = "Audio Converter";
@@ -22,10 +35,9 @@ const Home = () => {
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
-        const allowedFormats = ["wav", "mp3", "flac", "aac", "ogg", "m4a", "wma", "webm", "opus", "aiff"];
 
         if (selectedFile) {
-            const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
+            const fileExtension = selectedFile.name.split(".").pop().toLowerCase();
             if (!allowedFormats.includes(fileExtension)) {
                 alert("Unsupported file format. Please upload a valid audio file.");
                 setFile(null);
@@ -33,7 +45,6 @@ const Home = () => {
             }
             setFile(selectedFile);
             setError(null); // Reset any previous errors
-            console.log(`Selected file: ${selectedFile.name}`);
         }
     };
 
@@ -48,27 +59,26 @@ const Home = () => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("output_format", format);
-        if (codec) formData.append("codec", codec);
-        if (bitrate) formData.append("bitrate", bitrate);
-        if (sampleRate) formData.append("sample_rate", sampleRate);
-        if (channels) formData.append("channels", channels);
-        if (volume) formData.append("volume", volume);
+
+        // Add advanced options if they are provided
+        if (showAdvanced) {
+            if (bitrate) formData.append("bitrate", bitrate);
+            if (sampleRate) formData.append("sample_rate", sampleRate);
+            if (volume) formData.append("volume", volume);
+        }
 
         try {
             const response = await axios.post("http://127.0.0.1:5000/convert", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
+                withCredentials: true,
             });
 
             setConvertedFile(response.data.output_file);
-            alert("File converted successfully!");
         } catch (error) {
-            console.error("Error during file conversion:", error.response || error.message);
-            const errorMessage =
-                error.response?.data?.error ||
-                "File conversion failed. Please check the server or file compatibility.";
-            setError(errorMessage);
+            console.error("Error during file conversion:", error.response?.data || error.message);
+            setError("File conversion failed. Please check the server or file compatibility.");
         } finally {
             setIsLoading(false);
         }
@@ -79,91 +89,144 @@ const Home = () => {
             alert("No file available for download.");
             return;
         }
+
         setIsLoading(true);
+
         try {
             const response = await axios.get(`http://127.0.0.1:5000/download/${convertedFile}`, {
-                responseType: 'blob',
+                responseType: "blob",
+                withCredentials: true,
             });
 
-            const blob = new Blob([response.data]);
-
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = convertedFile;
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", convertedFile);
             document.body.appendChild(link);
             link.click();
-            link.parentNode.removeChild(link);
 
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }, 0);
         } catch (error) {
-            console.error("Error during file download:", error);
-            alert("Download failed.");
+            console.error("Error during file download:", error.message);
+            setError("Failed to download the file.");
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <Box textAlign="center" p="6">
-            <Heading as="h1" size="xl" mb="4">
+        <Flex direction="column" align="center" justify="center" py="10" px="4">
+            <Heading as="h1" size="xl" mb="6">
                 Audio Converter
             </Heading>
-            <Text mb="4">Upload your audio file and convert it to the desired format!</Text>
+            <Text mb="6" fontSize="lg" textAlign="center">
+                Upload your audio file and convert it to the desired format!
+            </Text>
 
-            <Box border="2px dashed gray" p="4" mb="4" width="full" textAlign="center" borderRadius="md">
+            <Box
+                border="2px dashed gray"
+                p="4"
+                mb="6"
+                width={["100%", "80%", "60%"]}
+                textAlign="center"
+                borderRadius="md"
+            >
                 <Text>Drag and drop your file here, or</Text>
-                <Input type="file" onChange={handleFileChange} mt="2" />
+                <Input type="file" onChange={handleFileChange} mt="4" />
             </Box>
 
-            <Select value={format} onChange={(e) => setFormat(e.target.value)} mb="4" width="full">
-                <option value="mp3">MP3</option>
-                <option value="wav">WAV</option>
-                <option value="flac">FLAC</option>
-                <option value="aac">AAC</option>
-                <option value="ogg">OGG</option>
-                <option value="m4a">M4A</option>
-                <option value="opus">OPUS</option>
+            <Select
+                placeholder="Select format"
+                value={format}
+                onChange={(e) => setFormat(e.target.value)}
+                mb="6"
+                width={["100%", "60%", "40%"]}
+            >
+                {allowedFormats.map((fmt) => (
+                    <option key={fmt} value={fmt}>
+                        {fmt.toUpperCase()}
+                    </option>
+                ))}
             </Select>
 
-            <Box mb="4">
-                <Text>Codec:</Text>
-                <Input value={codec} onChange={(e) => setCodec(e.target.value)} placeholder="Enter codec (e.g., pcm_s16le)" />
-            </Box>
-            <Box mb="4">
-                <Text>Bitrate:</Text>
-                <Input value={bitrate} onChange={(e) => setBitrate(e.target.value)} placeholder="Enter bitrate (e.g., 192k)" />
-            </Box>
-            <Box mb="4">
-                <Text>Sample Rate:</Text>
-                <Input value={sampleRate} onChange={(e) => setSampleRate(e.target.value)} placeholder="Enter sample rate (e.g., 44100)" />
-            </Box>
-            <Box mb="4">
-                <Text>Channels:</Text>
-                <Input value={channels} onChange={(e) => setChannels(e.target.value)} placeholder="Enter number of channels (e.g., 2)" />
-            </Box>
-            <Box mb="4">
-                <Text>Volume Multiplier:</Text>
-                <Input value={volume} onChange={(e) => setVolume(e.target.value)} placeholder="Enter volume (e.g., 1.5)" />
-            </Box>
+            <Checkbox isChecked={showAdvanced} onChange={() => setShowAdvanced(!showAdvanced)} mb="6">
+                Show Advanced Settings
+            </Checkbox>
 
-            <Button onClick={handleConvert} {...buttonStyles} disabled={isLoading}>
-                {isLoading ? <Spinner size="sm" /> : `Convert to ${format}`}
+            {showAdvanced && (
+                <VStack spacing={4} mb="6" width={["100%", "60%", "40%"]}>
+                    <Box>
+                        <Text mb="2">Bitrate (e.g., 192k):</Text>
+                        <Select
+                            placeholder="Select bitrate"
+                            value={bitrate}
+                            onChange={(e) => setBitrate(e.target.value)}
+                        >
+                            {allowedBitrates.map((br) => (
+                                <option key={br} value={br}>
+                                    {br}
+                                </option>
+                            ))}
+                        </Select>
+                    </Box>
+                    <Box>
+                        <Text mb="2">Sample Rate (e.g., 44100):</Text>
+                        <Select
+                            placeholder="Select sample rate"
+                            value={sampleRate}
+                            onChange={(e) => setSampleRate(e.target.value)}
+                        >
+                            {allowedSampleRates.map((sr) => (
+                                <option key={sr} value={sr}>
+                                    {sr}
+                                </option>
+                            ))}
+                        </Select>
+                    </Box>
+                    <Box>
+                        <Text mb="2">Volume Multiplier:</Text>
+                        <Select
+                            placeholder="Select volume"
+                            value={volume}
+                            onChange={(e) => setVolume(e.target.value)}
+                        >
+                            {allowedVolumes.map((vol) => (
+                                <option key={vol} value={vol}>
+                                    {vol}
+                                </option>
+                            ))}
+                        </Select>
+                    </Box>
+                </VStack>
+            )}
+
+            <Button
+                onClick={handleConvert}
+                colorScheme="green"
+                size="lg"
+                mb="6"
+                px="10"
+                isLoading={isLoading}
+                loadingText="Converting..."
+            >
+                Convert to {format}
             </Button>
 
             {error && (
-                <Text color="red.500" mt="4">
+                <Text color="red.500" mb="4">
                     {error}
                 </Text>
             )}
 
             {convertedFile && (
-                <Box mt="4">
-                    <Text fontSize="sm">Download your converted file below:</Text>
-                    <Button colorScheme="green" onClick={handleDownload} mt="2" disabled={isLoading}>
-                        {isLoading ? <Spinner size="sm" /> : `Download ${convertedFile}`}
-                    </Button>
-                </Box>
+                <Button colorScheme="blue" size="lg" onClick={handleDownload}>
+                    Download File
+                </Button>
             )}
-        </Box>
+        </Flex>
     );
 };
 
