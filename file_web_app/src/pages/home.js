@@ -26,8 +26,8 @@ const Home = () => {
 
     const allowedFormats = ["wav", "mp3", "flac", "aac", "ogg", "m4a", "wma", "webm", "opus", "aiff"];
     const allowedBitrates = ["64k", "128k", "192k", "256k", "320k"];
-    const allowedSampleRates = ["22050", "44100", "48000", "96000", "192000"];
-    const allowedVolumes = ["0.5", "1.0", "1.5", "2.0"];
+    const allowedSampleRates = ["96000", "88200", "64000", "48000", "44100", "32000", "24000", "22050", "16000", "12000", "11025", "8000", "7350"];
+    const allowedVolumes = ["0.5", "1.0", "1.5", "2.0", "2.5", "3.0"];
 
     useEffect(() => {
         document.title = "Audio Converter";
