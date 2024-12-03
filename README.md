@@ -1,32 +1,70 @@
+# Getting Started with Create React App
 
-```bash
-npm install
-npm start
-```
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
---------------------Out Dated--------------------
-# Format_Converter
+## Available Scripts
 
+In the project directory, you can run:
 
-# Introduction
+### `npm start`
 
-The **Format Converter** project is designed to provide a simple solution for converting files between HTML and PDF formats. This tool is useful for users who need to easily transform content from web-friendly HTML format into printable, shareable PDF files and vice versa. This document describes the purpose, key features, requirements, and usage of the Format Converter project.
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-# Project Description
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-The **Format Converter** project allows users to:
+### `npm test`
 
-1. **Convert HTML to PDF**: This feature enables the transformation of web pages, HTML reports, or documents formatted in HTML into PDF files. This is particularly useful for saving web content in a static, portable format.
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-2. **Convert PDF to HTML**: This feature converts PDF files back into HTML format. This allows for easier integration into web-based platforms, enabling content originally stored in PDF to be displayed on web pages.
+### `npm run build`
 
-This tool provides an intuitive interface, where users can simply upload a file, select the desired output format, and initiate the conversion process with ease.
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-# Key Features
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-- **File Upload**: Users can upload their files directly through the application interface.
-- **Format Selection**: Options to choose between HTML and PDF output formats.
-- **Conversion Process**: Efficiently converts files, with the progress or loading state indicated to the user.
-- **Download Option**: Users can download the converted file directly from the interface.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-  
+### `npm run eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
