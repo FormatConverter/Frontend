@@ -13,6 +13,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.5.1",
     "axios": "^1.7.8",
+    "file-saver": "^2.0.5",
     "framer-motion": "^5.5.5",
     "puppeteer": "^23.7.1",
     "react": "^18.2.0",
@@ -34,7 +35,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
-  "proxy": "http://127.0.0.1:5000",  
+  "proxy": "http://127.0.0.1:5000",
   "eslintConfig": {
     "extends": "react-app"
   },

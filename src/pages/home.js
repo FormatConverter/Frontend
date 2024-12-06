@@ -44,6 +44,7 @@ const Home = () => {
                 return;
             }
             setFile(selectedFile);
+            // setOriginalFileName(selectedFile.name)
             setError(null); // Reset any previous errors
         }
     };
@@ -74,7 +75,6 @@ const Home = () => {
                 },
                 withCredentials: true,
             });
-
             setConvertedFile(response.data.output_file);
         } catch (error) {
             console.error("Error during file conversion:", error.response?.data || error.message);
@@ -97,17 +97,31 @@ const Home = () => {
                 responseType: "blob",
                 withCredentials: true,
             });
-
+            
+            const contentDisposition = response.headers['content-disposition'];
+            let fileName = convertedFile; // if filename invalid for regex use the random name generated in backend
+            
+            // Extract filename from content-disposition header
+            if (contentDisposition) {
+                const filenameRegex = /filename\s*=\s*["']?([^"']+)["']?/i;
+                const matches = contentDisposition.match(filenameRegex);
+                
+                if (matches && matches[1]) {
+                    fileName = matches[1].trim(); // trim whitespace from the filename
+                }
+            }
+            
+            // download the file by creating a temporary link
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", convertedFile);
+            link.setAttribute("download", fileName);
             document.body.appendChild(link);
             link.click();
 
             setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
+               document.body.removeChild(link);
+               window.URL.revokeObjectURL(url);
             }, 0);
         } catch (error) {
             console.error("Error during file download:", error.message);
