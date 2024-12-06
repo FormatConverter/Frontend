@@ -44,7 +44,6 @@ const Home = () => {
                 return;
             }
             setFile(selectedFile);
-            // setOriginalFileName(selectedFile.name)
             setError(null); // Reset any previous errors
         }
     };
