@@ -18,12 +18,11 @@ const HeroSection = () => (
     animate={{ opacity: 1, y: 0 }}   
     transition={{ duration: 1 }}    
   >
-    <Heading size="lg" color="orange.600">
+    <Heading fontSize="6xl" color="orange.600" mb="6">
       Convert Your Audio Files Seamlessly
     </Heading>
 
-
-    <Box fontSize="10xl" color="gray.700" mb="10" >
+    <Box fontSize="3xl" color="gray.700" mb="10" >
       <Typical
         steps={[
           "Upload your audio file",         

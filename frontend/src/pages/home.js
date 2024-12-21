@@ -21,10 +21,22 @@ const Home = () => {
     const [convertedFile, setConvertedFile] = useState(null);
     const [error, setError] = useState(null);
     const currentFormatOptions = formatOptions[format]; 
+    const allowedFormats = Object.keys(formatOptions);
+    const handleFileChange = (event) => {
+      const selectedFile = event.target.files[0];
 
-  const handleFileChange = (event) => setFile(event.target.files[0]);
-
-  const handleConvert = async () => {
+      if (selectedFile) {
+          const fileExtension = selectedFile.name.split(".").pop().toLowerCase();
+          if (!allowedFormats.includes(fileExtension)) {
+              alert("Unsupported file format. Please upload a valid audio file.");
+              setFile(null);
+              return;
+          }
+          setFile(selectedFile);
+          setError(null); // Reset any previous errors
+        }
+     };
+    const handleConvert = async () => {
     if (!file) {
       setError("Please upload a file before converting.");
       return;
@@ -53,50 +65,49 @@ const Home = () => {
 
   const handleDownload = async () => {
     if (!convertedFile) {
-        alert("No file available for download.");
-        return;
+      alert("No file available for download.");
+      return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
-        const response = await axios.get(`http://127.0.0.1:5050/download/${convertedFile}`, {
-            responseType: "blob",
-            withCredentials: true,
-        });
-        
-        const contentDisposition = response.headers['content-disposition'];
-        let fileName = convertedFile; // if filename invalid for regex use the random name generated in backend
-        
-        // Extract filename from content-disposition header
-        if (contentDisposition) {
-            const filenameRegex = /filename\s*=\s*["']?([^"']+)["']?/i;
-            const matches = contentDisposition.match(filenameRegex);
-            
-            if (matches && matches[1]) {
-                fileName = matches[1].trim(); // trim whitespace from the filename
-            }
+      
+      const response = await axios.get(`http://127.0.0.1:5050/download/${convertedFile}`, {
+        responseType: "blob", 
+      });
+  
+      const contentDisposition = response.headers["content-disposition"];
+      let fileName = convertedFile;
+  
+      if (contentDisposition) {
+        const filenameRegex = /filename\s*=\s*["']?([^"']+)["']?/i;
+        const matches = contentDisposition.match(filenameRegex);
+  
+        if (matches && matches[1]) {
+          fileName = matches[1].trim();
         }
-        
-        // download the file by creating a temporary link
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", fileName);
-        document.body.appendChild(link);
-        link.click();
-
-        setTimeout(() => {
-           document.body.removeChild(link);
-           window.URL.revokeObjectURL(url);
-        }, 0);
+      }
+  
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName); 
+      document.body.appendChild(link);
+      link.click();
+  
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 0);
     } catch (error) {
-        console.error("Error during file download:", error.message);
-        setError("Failed to download the file.");
+      console.error("Error during file download:", error.message);
+      setError("Failed to download the file. Please try again.");
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
+
   return (
     
     <Box>
