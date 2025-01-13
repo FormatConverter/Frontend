@@ -14,7 +14,6 @@ const AdvancedOptions = ({ options, selectedOptions, setSelectedOptions }) => {
   if (!options) return null;
 
   const handleChange = (key, value) => {
-    // 값이 빈 값이면 해당 키를 삭제하고, 그렇지 않으면 추가
     setSelectedOptions((prev) => {
       if (!value && value !== 0) {
         const updatedOptions = { ...prev };
