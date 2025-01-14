@@ -14,7 +14,14 @@ const AdvancedOptions = ({ options, selectedOptions, setSelectedOptions }) => {
   if (!options) return null;
 
   const handleChange = (key, value) => {
-    setSelectedOptions((prev) => ({ ...prev, [key]: value }));
+    setSelectedOptions((prev) => {
+      if (!value && value !== 0) {
+        const updatedOptions = { ...prev };
+        delete updatedOptions[key];
+        return updatedOptions;
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   return (
@@ -92,7 +99,6 @@ const AdvancedOptions = ({ options, selectedOptions, setSelectedOptions }) => {
         <Box>
           <Text>Volume: {selectedOptions.volume || 1}</Text>
           <Slider
-            defaultValue={1}
             min={options.volume.min}
             max={options.volume.max}
             step={0.1}
@@ -107,12 +113,11 @@ const AdvancedOptions = ({ options, selectedOptions, setSelectedOptions }) => {
         </Box>
       )}
 
-      {/* Qscale (specific to MP3) */}
+      {/* Qscale */}
       {options.qscale && (
         <Box>
           <Text>Quality Scale: {selectedOptions.qscale || options.qscale.min}</Text>
           <Slider
-            defaultValue={options.qscale.min}
             min={options.qscale.min}
             max={options.qscale.max}
             step={1}
@@ -131,4 +136,3 @@ const AdvancedOptions = ({ options, selectedOptions, setSelectedOptions }) => {
 };
 
 export default AdvancedOptions;
-
